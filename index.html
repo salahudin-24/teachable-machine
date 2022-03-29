@@ -1,59 +1,244 @@
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+<!DOCTYPE html>
+<html lang="en">
 
-    // the link to your model provided by Teachable Machine export panel
-    const URL = "https://teachablemachine.withgoogle.com/models/ojUifH4z-/";
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    let model, webcam, labelContainer, maxPredictions;
+  <title>Mask Detector</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-        // load the model and metadata
-        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-        // or files from your local hard drive
-        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
-        // Convenience function to setup a webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
-        await webcam.play();
-        window.requestAnimationFrame(loop);
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
-        // append elements to the DOM
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-        labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < maxPredictions; i++) { // and class labels
-            labelContainer.appendChild(document.createElement("div"));
-        }
-    }
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
 
-    async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
+  <!-- =======================================================
+  * Template Name: KnightOne - v4.7.0
+  * Template URL: https://bootstrapmade.com/knight-simple-one-page-bootstrap-template/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
 
-    // run the webcam image through the image model
-    async function predict() {
-        // predict can take in an image, video or canvas html element
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
-        }
-    }
-</script>
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="fixed-top ">
+    <div class="container-fluid">
+
+      <div class="row justify-content-center">
+        <div class="col-xl-9 d-flex align-items-center justify-content-lg-between">
+          <h1 class="logo me-auto me-lg-0"><a href="index.html">Mask Detector</a></h1>
+          <!-- Uncomment below if you prefer to use an image logo -->
+          <!-- <a href="index.html" class="logo me-auto me-lg-0"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
+          <nav id="navbar" class="navbar order-last order-lg-0">
+
+            <i class="bi bi-list mobile-nav-toggle"></i>
+          </nav><!-- .navbar -->
+
+          <a href="#about" class="get-started-btn scrollto">Get Started</a>
+        </div>
+      </div>
+
+    </div>
+  </header><!-- End Header -->
+
+  <!-- ======= Hero Section ======= -->
+  <section id="hero" class="d-flex flex-column justify-content-center">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-xl-8">
+          <h1>Mask Detector </h1>
+          <h2>We want to make sure that you always wear a mask</h2>
+        </div>
+      </div>
+    </div>
+  </section><!-- End Hero -->
+
+  <main id="main">
+
+    <!-- Mask Detection Section -->
+    <section id="about" class="about">
+      <div class="container">
+
+        <div class="section-title">
+          <h2>Are you wearing mask?</h2>
+          <p>Please remove any accessories execpt your mask and make sure your face is close and right in the center of the camera.</p>
+        </div>
+
+        <div class="row content">
+          <div>Press button bellow and allow access to the camera, then wait for a while till camera appears</div>
+          <button type="button" onclick="init()">Start</button>
+          <div id="webcam-container"></div>
+          <div id="label-container"></div>
+          <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+          <script type="text/javascript">
+              // More API functions here:
+              // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+              // the link to your model provided by Teachable Machine export panel
+              const URL = "https://teachablemachine.withgoogle.com/models/ojUifH4z-/";
+
+              let model, webcam, labelContainer, maxPredictions;
+
+              // Load the image model and setup the webcam
+              async function init() {
+                  const modelURL = URL + "model.json";
+                  const metadataURL = URL + "metadata.json";
+
+                  // load the model and metadata
+                  // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
+                  // or files from your local hard drive
+                  // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+                  model = await tmImage.load(modelURL, metadataURL);
+                  maxPredictions = model.getTotalClasses();
+
+                  // Convenience function to setup a webcam
+                  const flip = true; // whether to flip the webcam
+                  webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+                  await webcam.setup(); // request access to the webcam
+                  await webcam.play();
+                  window.requestAnimationFrame(loop);
+
+                  // append elements to the DOM
+                  document.getElementById("webcam-container").appendChild(webcam.canvas);
+                  labelContainer = document.getElementById("label-container");
+                  for (let i = 0; i < maxPredictions; i++) { // and class labels
+                      labelContainer.appendChild(document.createElement("div"));
+                  }
+              }
+
+              async function loop() {
+                  webcam.update(); // update the webcam frame
+                  await predict();
+                  window.requestAnimationFrame(loop);
+              }
+
+              // run the webcam image through the image model
+              async function predict() {
+                  // predict can take in an image, video or canvas html element
+                  const prediction = await model.predict(webcam.canvas);
+                  for (let i = 0; i < maxPredictions; i++) {
+                      const classPrediction =
+                          prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                      labelContainer.childNodes[i].innerHTML = classPrediction;
+                  }
+              }
+          </script>
+        </div>
+
+      </div>
+    </section><!-- End Mask Detection Section -->
+
+
+    <!-- ======= Faq Section ======= -->
+    <section id="faq" class="faq">
+      <div class="container-fluid">
+
+        <div class="row">
+
+          <div class="col-lg-7 d-flex flex-column justify-content-center align-items-stretch  order-2 order-lg-1">
+
+            <div class="content">
+              <h3>Frequently Asked <strong>Questions</strong></h3>
+              <p>
+                Some of your problem maybe listed below
+              </p>
+            </div>
+
+            <div class="accordion-list">
+              <ul>
+                <li>
+                  <a data-bs-toggle="collapse" class="collapse" data-bs-target="#accordion-list-1">Why was it detected that I was not wearing a mask even though I was using it? <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-1" class="collapse show" data-bs-parent=".accordion-list">
+                    <p>
+                      False negative detection occurs because you are using accessories other than a mask or you are not close enough to the camera.
+                    </p>
+                  </div>
+                </li>
+
+                <li>
+                  <a data-bs-toggle="collapse" data-bs-target="#accordion-list-2" class="collapsed">Why is the camera capture not showing up? <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-2" class="collapse" data-bs-parent=".accordion-list">
+                    <p>
+                      You may not have allowed the website to use the camera, press allow when a pop-up appears.
+                    </p>
+                  </div>
+                </li>
+
+                <li>
+                  <a data-bs-toggle="collapse" data-bs-target="#accordion-list-3" class="collapsed">Why doesn't the camera appear, even though I have allowed the website to access the camera? <i class="bx bx-chevron-down icon-show"></i><i class="bx bx-chevron-up icon-close"></i></a>
+                  <div id="accordion-list-3" class="collapse" data-bs-parent=".accordion-list">
+                    <p>
+                      Camera captures may take longer to appear, so please wait for a while.
+                    </p>
+                  </div>
+                </li>
+
+              </ul>
+            </div>
+
+          </div>
+
+          <div class="col-lg-5 align-items-stretch order-1 order-lg-2 img" style='background-image: url("assets/img/faq.jpg");'>&nbsp;</div>
+        </div>
+
+      </div>
+    </section><!-- End Faq Section -->
+
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="container">
+      <h3>Mask Detector</h3>
+      <p>We want to make sure that you always wear a mask.</p>
+
+      <div class="copyright">
+        &copy; Copyright <strong><span>KnightOne</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/knight-simple-one-page-bootstrap-template/ -->
+        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/purecounter/purecounter.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>
